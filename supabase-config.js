@@ -1,7 +1,7 @@
 // Supabase public client configuration.
-// Replace these two values with the Project URL and Publishable key from your Supabase project.
+// Publishable key is intended for browser/client-side use; RLS protects user data.
 // IMPORTANT: never put a Supabase secret/service-role key here.
 window.SUPABASE_CONFIG = {
-  url: 'PASTE_YOUR_SUPABASE_PROJECT_URL_HERE',
-  publishableKey: 'PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'
+  url: 'https://zomldmpantjonlclzxnt.supabase.co',
+  publishableKey: 'sb_publishable_-G0Qfc4szzW8YDLYF17jnA_lAFGXGWk'
 };
