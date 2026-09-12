@@ -3,51 +3,70 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CR / DRILL — Critical Reasoning</title>
+<title>CR Arena — Critical Reasoning Practice</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">CR / DRILL</div>
-  <div class="tag">CRITICAL REASONING · GMAT & LSAT STYLE</div>
-  <nav><button data-nav="home" class="nav active">PRACTICE</button><button data-nav="performance" class="nav">MY PROGRESS</button></nav>
+  <div class="brand"><span class="brand-mark">CR</span><span>ARENA</span></div>
+  <div class="tag">CAT CRITICAL REASONING LAB</div>
+  <nav><button data-nav="home" class="nav active">PRACTICE</button><button data-nav="performance" class="nav">ANALYTICS</button></nav>
 </header>
 
 <main id="homeView">
   <section class="hero">
-    <div class="eyebrow hero-label">YOUR CR PRACTICE ROOM</div>
-    <h1>Practice smarter.<br><span>One set at a time.</span></h1>
-    <p>Each set has 10 questions and a 15-minute timer. Pick a set, answer the questions, and see your score immediately.</p>
-    <div class="quick-start">
-      <button type="button" id="nextSetBtn" class="big-primary">▶ START NEXT SET</button>
-      <div class="quick-note">+3 correct &nbsp; · &nbsp; −1 wrong &nbsp; · &nbsp; 0 blank</div>
+    <div class="hero-copy">
+      <div class="eyebrow hero-label">DAILY REASONING WORKOUT</div>
+      <h1>Train your<br><span>critical thinking.</span></h1>
+      <p>Build speed, accuracy and decision-making with focused CR sets. Finish a set in 15 minutes and review your performance instantly.</p>
+      <div class="quick-start">
+        <button type="button" id="nextSetBtn" class="big-primary">START NEXT SET <span>→</span></button>
+        <div class="quick-note"><b>15 MIN</b> &nbsp;·&nbsp; 10 QUESTIONS &nbsp;·&nbsp; +3 / −1 / 0</div>
+      </div>
     </div>
-    <div class="stats">
-      <div><strong>1,953</strong><small>QUESTIONS</small></div><div><strong>196</strong><small>SETS</small></div><div><strong id="completedCount">0</strong><small>COMPLETED</small></div><div><strong id="totalMarks">—</strong><small>TOTAL MARKS</small></div><div><strong id="strikeRate">—</strong><small>ACCURACY</small></div>
+    <div class="hero-side">
+      <div class="mini-title">YOUR WORKOUT</div>
+      <div class="ring-wrap"><div class="ring"><strong id="completedCount">0</strong><span>SETS<br>DONE</span></div></div>
+      <div class="hero-side-row"><span>Question bank</span><b>1,953</b></div>
+      <div class="hero-side-row"><span>Available sets</span><b>196</b></div>
     </div>
   </section>
-  <section class="set-toolbar"><div><h2>Choose a practice set</h2><p>Green = completed · Gold = not attempted</p></div><label class="search-box">⌕ <input id="setSearch" type="search" placeholder="Find set 001, 025…"></label></section>
-  <div class="tabs"><button type="button" class="filter active" data-filter="all">ALL</button><button type="button" class="filter" data-filter="GMAT">GMAT STYLE</button><button type="button" class="filter" data-filter="LSAT">LSAT STYLE</button><button type="button" class="filter" data-filter="notstarted">NOT STARTED</button></div>
+
+  <section class="stats">
+    <div><span class="stat-icon">✓</span><div><strong id="totalMarks">—</strong><small>TOTAL MARKS</small></div></div>
+    <div><span class="stat-icon">%</span><div><strong id="strikeRate">—</strong><small>ACCURACY</small></div></div>
+    <div><span class="stat-icon">↗</span><div><strong>15</strong><small>MIN / SET</small></div></div>
+    <div><span class="stat-icon">Q</span><div><strong>10</strong><small>QUESTIONS / SET</small></div></div>
+  </section>
+
+  <section class="set-toolbar">
+    <div><div class="section-kicker">PRACTICE LIBRARY</div><h2>Pick your next challenge</h2><p>Completed sets are marked in green. Start anywhere.</p></div>
+    <label class="search-box"><span>⌕</span><input id="setSearch" type="search" placeholder="Search set number…"></label>
+  </section>
+  <div class="tabs"><button type="button" class="filter active" data-filter="all">ALL SETS</button><button type="button" class="filter" data-filter="GMAT">GMAT STYLE</button><button type="button" class="filter" data-filter="LSAT">LSAT STYLE</button><button type="button" class="filter" data-filter="notstarted">NOT STARTED</button></div>
   <section id="setGrid" class="grid"></section>
 </main>
 
 <main id="performanceView" class="hidden">
-  <section class="hero compact"><div class="eyebrow hero-label">YOUR PERFORMANCE</div><h1>See your progress.<br><span>Improve every set.</span></h1><p>Your completed practice results are saved in this browser, so you can track your progress over time.</p></section>
-  <section class="perf-cards"><div><strong id="pMocks">0</strong><small>SETS COMPLETED</small></div><div><strong id="pAvg">—</strong><small>AVERAGE MARKS</small></div><div><strong id="pBest">—</strong><small>BEST MARKS</small></div><div><strong id="pAccuracy">—</strong><small>ACCURACY</small></div></section>
-  <section class="panel"><div class="panel-head"><h2>Score trend</h2><span>Last 20 attempts</span></div><canvas id="scoreChart" height="260"></canvas></section>
-  <section class="panel"><div class="panel-head"><h2>Practice history</h2><button type="button" id="clearHistory" class="danger">Clear history</button></div><div id="history"></div></section>
+  <section class="hero compact">
+    <div class="hero-copy"><div class="eyebrow hero-label">PERFORMANCE CENTER</div><h1>Know your numbers.<br><span>Improve your game.</span></h1><p>Your practice history stays saved in this browser, giving you a simple view of consistency, accuracy and score progression.</p></div>
+    <div class="hero-side analytics-side"><div class="mini-title">TRACK YOUR EDGE</div><p>Use the trend line to spot whether your recent practice is moving up, down or sideways.</p><div class="trend-chip">↗ SCORE TREND</div></div>
+  </section>
+  <section class="perf-cards"><div><span class="perf-icon">01</span><strong id="pMocks">0</strong><small>SETS COMPLETED</small></div><div><span class="perf-icon">AVG</span><strong id="pAvg">—</strong><small>AVERAGE MARKS</small></div><div><span class="perf-icon">★</span><strong id="pBest">—</strong><small>BEST MARKS</small></div><div><span class="perf-icon">%</span><strong id="pAccuracy">—</strong><small>ACCURACY</small></div></section>
+  <section class="panel"><div class="panel-head"><div><div class="section-kicker">PROGRESS</div><h2>Score trend</h2></div><span>Last 20 attempts</span></div><canvas id="scoreChart" height="260"></canvas></section>
+  <section class="panel"><div class="panel-head"><div><div class="section-kicker">HISTORY</div><h2>Practice history</h2></div><button type="button" id="clearHistory" class="danger">Clear history</button></div><div id="history"></div></section>
 </main>
 
 <div id="mockModal" class="modal hidden">
   <div class="modal-card mock-card">
-    <div class="mock-head"><button type="button" id="exitMock" class="exit-btn">× EXIT</button><span id="mockLabel">SET 001</span><div class="timer-tools"><button type="button" id="pauseBtn" class="pause-btn">Ⅱ PAUSE</button><span id="timer">15:00</span></div></div>
+    <div class="mock-head"><button type="button" id="exitMock" class="exit-btn">← EXIT SET</button><span id="mockLabel">SET 001</span><div class="timer-tools"><button type="button" id="pauseBtn" class="pause-btn">Ⅱ PAUSE</button><span id="timer">15:00</span></div></div>
     <div id="pausedBanner" class="paused-banner hidden">⏸ TIMER PAUSED — Take your time. Resume when you are ready.</div>
     <div class="progress"><div id="progressBar"></div></div>
-    <div class="progress-label"><span id="progressText">Question 1 of 10</span><span>Choose one answer</span></div>
+    <div class="progress-label"><span id="progressText">Question 1 of 10</span><span>ONE BEST ANSWER</span></div>
     <div id="questionArea"></div>
-    <div class="mock-actions"><button type="button" id="prevBtn" class="secondary">← BACK</button><button type="button" id="nextBtn" class="primary">NEXT →</button><button type="button" id="submitBtn" class="submit hidden">FINISH SET ✓</button></div>
+    <div class="mock-actions"><button type="button" id="prevBtn" class="secondary">← BACK</button><button type="button" id="nextBtn" class="primary">NEXT QUESTION →</button><button type="button" id="submitBtn" class="submit hidden">FINISH SET ✓</button></div>
   </div>
 </div>
 
-<div id="resultModal" class="modal hidden"><div class="modal-card result"><div class="eyebrow">SET COMPLETE 🎉</div><h2 id="resultTitle">Set 001</h2><div class="result-score" id="resultScore">0</div><p id="resultSummary"></p><div class="result-grid"><div><b id="rCorrect">0</b><span>CORRECT</span></div><div><b id="rWrong">0</b><span>WRONG</span></div><div><b id="rBlank">0</b><span>BLANK</span></div><div><b id="rAccuracy">0%</b><span>ACCURACY</span></div></div><button type="button" id="closeResult" class="primary wide">CONTINUE PRACTISING</button></div></div>
+<div id="resultModal" class="modal hidden"><div class="modal-card result"><div class="eyebrow">WORKOUT COMPLETE 🎉</div><h2 id="resultTitle">Set 001</h2><div class="result-score" id="resultScore">0</div><p id="resultSummary"></p><div class="result-grid"><div><b id="rCorrect">0</b><span>CORRECT</span></div><div><b id="rWrong">0</b><span>WRONG</span></div><div><b id="rBlank">0</b><span>BLANK</span></div><div><b id="rAccuracy">0%</b><span>ACCURACY</span></div></div><button type="button" id="closeResult" class="primary wide">BACK TO PRACTICE</button></div></div>
 <script src="data.js"></script><script src="app.js"></script></body></html>
