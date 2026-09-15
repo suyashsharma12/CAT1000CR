@@ -14,18 +14,18 @@ const completedSetCount=()=>new Set(attempts().map(a=>a.setId)).size;
     state.filter=filter;const grid=$('setGrid');const search=state.search.trim().toLowerCase();grid.innerHTML='';
     CR_DATA.sets.forEach(s=>{const done=latestAttempt(s.id),source=(s.source||'').toUpperCase();
       if(filter==='notstarted'&&done)return;if(filter==='GMAT'&&!source.includes('GMAT'))return;if(filter==='LSAT'&&!source.includes('LSAT'))return;if(search&&!s.name.toLowerCase().includes(search))return;
-      const el=document.createElement('button');el.type='button';el.className='set-card '+(done?'done':'');
-      el.innerHTML=`<div class="set-no">${s.name}</div><div class="set-source">${s.source}</div><div class="set-status">${done?`✓ ${done.score} marks · ${done.accuracy}% accuracy`:'Start this set →'}</div>`;
-      el.addEventListener('click',()=>startSet(s));grid.appendChild(el);
+      const el=document.createElement('button');el.type='button';el.className='set-card '+(done?'done':'');el.disabled=!!done;
+      el.innerHTML=`<div class="set-no">${s.name}</div><div class="set-source">${s.source}</div><div class="set-status">${done?`✓ Completed · ${done.score} marks · ${done.accuracy}% accuracy`:'Start this set →'}</div>`;
+      if(!done)el.addEventListener('click',()=>startSet(s));grid.appendChild(el);
     });
     if(!grid.children.length)grid.innerHTML='<p style="grid-column:1/-1;color:#9aa8b6;font:13px monospace;padding:25px 0">No sets found. Try another filter or search.</p>';updateStats();
   }
 
-  function updateStats(){const a=attempts();$('completedCount').textContent=completedSetCount();$('totalMarks').textContent=a.length?a.reduce((x,y)=>x+y.score,0):'—';$('strikeRate').textContent=a.length?Math.round(a.reduce((x,y)=>x+y.accuracy,0)/a.length)+'%':'—';}
-  function startNextSet(){const done=new Set(attempts().map(a=>a.setId));const next=CR_DATA.sets.find(s=>!done.has(s.id))||CR_DATA.sets[0];if(next)startSet(next);}
-  function startSet(set){if(!set||!Array.isArray(set.question_ids)||!set.question_ids.length)return;state.set=set;state.index=0;state.answers={};state.started=Date.now();state.remaining=900;state.paused=false;state.finished=false;state.endAt=Date.now()+900000;$('mockLabel').textContent='SET '+set.name;$('mockModal').classList.remove('hidden');$('pausedBanner').classList.add('hidden');updatePauseButton();renderQuestion();startTimer();}
+  function updateStats(){const a=attempts();$('completedCount').textContent=completedSetCount();$('totalMarks').textContent=a.length?a.reduce((x,y)=>x+y.score,0):'—';$('strikeRate').textContent=a.length?Math.round(a.reduce((x,y)=>x+y.accuracy,0)/a.length)+'%':'—';const next=CR_DATA.sets.find(s=>!attempts().some(a=>a.setId===s.id));if($('nextSetBtn')){if(next){$('nextSetBtn').disabled=false;$('nextSetBtn').textContent='START NEXT SET →';}else{$('nextSetBtn').disabled=true;$('nextSetBtn').textContent='ALL SETS COMPLETED ✓';}}}
+  function startNextSet(){const done=new Set(attempts().map(a=>a.setId));const next=CR_DATA.sets.find(s=>!done.has(s.id));if(next)startSet(next);else alert('You have completed all 196 sets. Retakes are disabled.');}
+  function startSet(set){if(!set||!Array.isArray(set.question_ids)||!set.question_ids.length||latestAttempt(set.id))return;state.set=set;state.index=0;state.answers={};state.started=Date.now();state.remaining=900;state.paused=false;state.finished=false;state.endAt=Date.now()+900000;$('mockLabel').textContent='SET '+set.name;$('mockModal').classList.remove('hidden');$('pausedBanner').classList.add('hidden');updatePauseButton();renderQuestion();startTimer();}
   function setQuestions(){return state.set.question_ids.map(id=>qById(id)).filter(Boolean);}
-  function renderQuestion(){const qs=setQuestions(),q=qs[state.index];if(!q)return;const selected=state.answers[q.id];$('progressBar').style.width=((state.index+1)/qs.length*100)+'%';$('progressText').textContent=`Question ${state.index+1} of ${qs.length}`;$('questionArea').innerHTML=`<div class="q-meta">${q.type.toUpperCase()} · ${q.difficulty.toUpperCase()}</div><div class="question">${q.question}</div><div class="stimulus">${q.stimulus}</div><div class="options">${q.options.map((o,i)=>`<button type="button" class="option ${selected===i?'selected':''}" data-i="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>`;document.querySelectorAll('.option').forEach(b=>b.onclick=()=>{if(state.paused)return;state.answers[q.id]=+b.dataset.i;renderQuestion();});$('prevBtn').disabled=state.index===0;$('nextBtn').classList.toggle('hidden',state.index===qs.length-1);$('submitBtn').classList.toggle('hidden',state.index!==qs.length-1);}
+  function renderQuestion(){const qs=setQuestions(),q=qs[state.index];if(!q)return;const selected=state.answers[q.id];const cleanStimulus=String(q.stimulus||'').replace(/\s*Study code \d+-\d+\.\s*$/,'');$('progressBar').style.width=((state.index+1)/qs.length*100)+'%';$('progressText').textContent=`Question ${state.index+1} of ${qs.length}`;$('questionArea').innerHTML=`<div class="q-meta">${q.type.toUpperCase()} · ${q.difficulty.toUpperCase()}</div><div class="question">${q.question}</div><div class="stimulus">${cleanStimulus}</div><div class="options">${q.options.map((o,i)=>`<button type="button" class="option ${selected===i?'selected':''}" data-i="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>`;document.querySelectorAll('.option').forEach(b=>b.onclick=()=>{if(state.paused)return;state.answers[q.id]=+b.dataset.i;renderQuestion();});$('prevBtn').disabled=state.index===0;$('nextBtn').classList.toggle('hidden',state.index===qs.length-1);$('submitBtn').classList.toggle('hidden',state.index!==qs.length-1);}
   function startTimer(){clearInterval(state.timer);state.endAt=Date.now()+state.remaining*1000;state.timer=setInterval(()=>{if(state.paused||state.finished)return;state.remaining=Math.max(0,Math.ceil((state.endAt-Date.now())/1000));updateTimer();if(state.remaining<=0)finishSet();},250);updateTimer();}
   function updateTimer(){const left=Math.max(0,state.remaining);$('timer').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`;$('timer').classList.toggle('timer-warning',left<=60&&left>0);}
   function updatePauseButton(){$('pauseBtn').textContent=state.paused?'▶ RESUME':'Ⅱ PAUSE';$('pausedBanner').classList.toggle('hidden',!state.paused);$('pauseBtn').classList.toggle('resume',state.paused);}
@@ -48,7 +48,27 @@ const completedSetCount=()=>new Set(attempts().map(a=>a.setId)).size;
       alert('Your result could not be synced to your account. Please check your internet connection and try FINISH SET again. Your score has not been marked complete yet.');
       return;
     }
-    $('mockModal').classList.add('hidden');$('resultModal').classList.remove('hidden');$('resultTitle').textContent='Set '+state.set.name;$('resultScore').textContent=score;$('resultSummary').textContent=`${correct} correct · ${wrong} wrong · ${blank} blank`;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rBlank').textContent=blank;$('rAccuracy').textContent=accuracy.toFixed(1)+'%';renderSets(state.filter);
+    $('mockModal').classList.add('hidden');$('resultModal').classList.remove('hidden');$('resultTitle').textContent='Set '+state.set.name;$('resultScore').textContent=score;$('resultSummary').textContent=`${correct} correct · ${wrong} wrong · ${blank} blank`;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rBlank').textContent=blank;$('rAccuracy').textContent=accuracy.toFixed(1)+'%';renderReview(qs);renderSets(state.filter);
+  }
+
+  function renderReview(qs){
+    const box=$('answerReview');
+    box.innerHTML=qs.map((q,idx)=>{
+      const selected=state.answers[q.id];
+      const isBlank=selected==null;
+      const isCorrect=!isBlank&&selected===q.answer;
+      const status=isBlank?'BLANK':isCorrect?'CORRECT':'WRONG';
+      const statusClass=isBlank?'blank':isCorrect?'correct':'wrong';
+      const cleanStimulus=String(q.stimulus||'').replace(/\s*Study code \d+-\d+\.\s*$/,'');
+      const optionRows=q.options.map((o,i)=>{
+        const selectedHere=selected===i;
+        const correctHere=q.answer===i;
+        const cls=correctHere?'review-option correct-answer':selectedHere?'review-option selected-answer':'review-option';
+        const tag=correctHere?' ✓ Correct answer':selectedHere?' ✕ Your answer':'';
+        return `<div class="${cls}"><span>${String.fromCharCode(65+i)}.</span><span>${o}</span><b>${tag}</b></div>`;
+      }).join('');
+      return `<article class="review-item ${statusClass}"><div class="review-head"><span>Q${idx+1} · ${q.type}</span><strong>${status}</strong></div><h3>${q.question}</h3><div class="review-stimulus">${cleanStimulus}</div><div class="review-options">${optionRows}</div><div class="review-explanation"><b>Explanation</b><p>${q.explanation||'Review the correct option against the argument given above.'}</p></div></article>`;
+    }).join('');
   }
 
   $('nextSetBtn').addEventListener('click',e=>{e.preventDefault();startNextSet();});
