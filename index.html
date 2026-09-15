@@ -54,7 +54,7 @@
     <div class="hero-copy">
       <div class="eyebrow hero-label">DAILY REASONING WORKOUT</div>
       <h1>Train your<br><span>critical thinking.</span></h1>
-      <p>Build speed, accuracy and decision-making with focused CR sets. Finish a set in 15 minutes and review your performance instantly.</p>
+      <p>Build speed, accuracy and decision-making with focused CR sets. Finish a set in 15 minutes and review every answer instantly.</p>
       <div class="quick-start">
         <button type="button" id="nextSetBtn" class="big-primary">START NEXT SET <span>→</span></button>
         <div class="quick-note"><b>15 MIN</b> &nbsp;·&nbsp; 10 QUESTIONS &nbsp;·&nbsp; +3 / −1 / 0</div>
@@ -76,7 +76,7 @@
   </section>
 
   <section class="set-toolbar">
-    <div><div class="section-kicker">PRACTICE LIBRARY</div><h2>Pick your next challenge</h2><p>Completed sets are marked in green. Start anywhere.</p></div>
+    <div><div class="section-kicker">PRACTICE LIBRARY</div><h2>Pick your next challenge</h2><p>Completed sets are locked. Each set can be attempted only once.</p></div>
     <label class="search-box"><span>⌕</span><input id="setSearch" type="search" placeholder="Search set number…"></label>
   </section>
   <div class="tabs"><button type="button" class="filter active" data-filter="all">ALL SETS</button><button type="button" class="filter" data-filter="GMAT">GMAT STYLE</button><button type="button" class="filter" data-filter="LSAT">LSAT STYLE</button><button type="button" class="filter" data-filter="notstarted">NOT STARTED</button></div>
@@ -104,7 +104,7 @@
   </div>
 </div>
 
-<div id="resultModal" class="modal hidden"><div class="modal-card result"><div class="eyebrow">WORKOUT COMPLETE 🎉</div><h2 id="resultTitle">Set 001</h2><div class="result-score" id="resultScore">0</div><p id="resultSummary"></p><div class="result-grid"><div><b id="rCorrect">0</b><span>CORRECT</span></div><div><b id="rWrong">0</b><span>WRONG</span></div><div><b id="rBlank">0</b><span>BLANK</span></div><div><b id="rAccuracy">0%</b><span>ACCURACY</span></div></div><button type="button" id="closeResult" class="primary wide">BACK TO PRACTICE</button></div></div>
+<div id="resultModal" class="modal hidden"><div class="modal-card result"><div class="eyebrow">WORKOUT COMPLETE 🎉</div><h2 id="resultTitle">Set 001</h2><div class="result-score" id="resultScore">0</div><p id="resultSummary"></p><div class="result-grid"><div><b id="rCorrect">0</b><span>CORRECT</span></div><div><b id="rWrong">0</b><span>WRONG</span></div><div><b id="rBlank">0</b><span>BLANK</span></div><div><b id="rAccuracy">0%</b><span>ACCURACY</span></div></div><section class="review-section"><div class="review-title"><span>ANSWER REVIEW</span><small>Correct answers, your choices and explanations</small></div><div id="answerReview"></div></section><button type="button" id="closeResult" class="primary wide">BACK TO PRACTICE</button></div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
