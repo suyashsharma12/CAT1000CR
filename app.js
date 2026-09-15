@@ -1,4 +1,4 @@
-const state={set:null,index:0,answers:{},started:0,timer:null,filter:'all',search:'',remaining:900,paused:false,endAt:0,finished:false};
+const state={set:null,index:0,answers:{},started:0,timer:null,filter:'all',search:'',remaining:900,paused:false,endAt:0,finished:false,reviewQuestions:[],reviewIndex:0};
 const $=id=>document.getElementById(id);
 const attempts=()=>JSON.parse(localStorage.getItem(window.CR_ATTEMPT_KEY||'crdrill_attempts_guest')||'[]');
 const saveAttempts=a=>localStorage.setItem(window.CR_ATTEMPT_KEY||'crdrill_attempts_guest',JSON.stringify(a));
@@ -48,7 +48,7 @@ const completedSetCount=()=>new Set(attempts().map(a=>a.setId)).size;
       alert('Your result could not be synced to your account. Please check your internet connection and try FINISH SET again. Your score has not been marked complete yet.');
       return;
     }
-    $('mockModal').classList.add('hidden');$('resultModal').classList.remove('hidden');$('resultTitle').textContent='Set '+state.set.name;$('resultScore').textContent=score;$('resultSummary').textContent=`${correct} correct · ${wrong} wrong · ${blank} blank`;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rBlank').textContent=blank;$('rAccuracy').textContent=accuracy.toFixed(1)+'%';renderReview(qs);renderSets(state.filter);
+    $('mockModal').classList.add('hidden');$('resultModal').classList.remove('hidden');$('resultTitle').textContent='Set '+state.set.name;$('resultScore').textContent=score;$('resultSummary').textContent=`${correct} correct · ${wrong} wrong · ${blank} blank`;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rBlank').textContent=blank;$('rAccuracy').textContent=accuracy.toFixed(1)+'%';state.reviewQuestions=qs;state.reviewIndex=0;renderReview(qs);renderSets(state.filter);
   }
 
   function renderReview(qs){
@@ -59,17 +59,27 @@ const completedSetCount=()=>new Set(attempts().map(a=>a.setId)).size;
       const isCorrect=!isBlank&&selected===q.answer;
       const status=isBlank?'BLANK':isCorrect?'CORRECT':'WRONG';
       const statusClass=isBlank?'blank':isCorrect?'correct':'wrong';
-      const cleanStimulus=String(q.stimulus||'').replace(/\s*Study code \d+-\d+\.\s*$/,'');
-      const optionRows=q.options.map((o,i)=>{
-        const selectedHere=selected===i;
-        const correctHere=q.answer===i;
-        const cls=correctHere?'review-option correct-answer':selectedHere?'review-option selected-answer':'review-option';
-        const tag=correctHere?' ✓ Correct answer':selectedHere?' ✕ Your answer':'';
-        return `<div class="${cls}"><span>${String.fromCharCode(65+i)}.</span><span>${o}</span><b>${tag}</b></div>`;
-      }).join('');
-      return `<article class="review-item ${statusClass}"><div class="review-head"><span>Q${idx+1} · ${q.type}</span><strong>${status}</strong></div><h3>${q.question}</h3><div class="review-stimulus">${cleanStimulus}</div><div class="review-options">${optionRows}</div><div class="review-explanation"><b>Explanation</b><p>${q.explanation||'Review the correct option against the argument given above.'}</p></div></article>`;
+      const chosen=isBlank?'No answer':String.fromCharCode(65+selected);
+      const correctLetter=String.fromCharCode(65+q.answer);
+      return `<button type="button" class="review-row ${statusClass}" data-review-index="${idx}"><span class="review-qno">${String(idx+1).padStart(2,'0')}</span><span class="review-row-text">${q.question}</span><span class="review-row-answer">${isCorrect?'✓ '+correctLetter:isBlank?'—':chosen+' → '+correctLetter}</span><strong>${status==='CORRECT'?'+3':status==='WRONG'?'−1':'0'}</strong><span class="review-row-arrow">›</span></button>`;
     }).join('');
+    box.querySelectorAll('.review-row').forEach(row=>row.addEventListener('click',()=>openReviewDetail(+row.dataset.reviewIndex)));
   }
+
+  function openReviewDetail(index){
+    const qs=state.reviewQuestions;if(!qs[index])return;state.reviewIndex=index;const q=qs[index],selected=state.answers[q.id],isBlank=selected==null,isCorrect=!isBlank&&selected===q.answer;
+    const status=isBlank?'BLANK':isCorrect?'CORRECT':'WRONG';
+    $('reviewDetailNumber').textContent=String(index+1).padStart(2,'0')+' / '+qs.length;
+    $('reviewDetailType').textContent=(q.type||'CR').toUpperCase()+' · '+(q.difficulty||'').toUpperCase();
+    $('reviewDetailStatus').textContent=status;
+    $('reviewDetailStatus').className='review-status '+status.toLowerCase();
+    const cleanStimulus=String(q.stimulus||'').replace(/\s*Study code \d+-\d+\.\s*$/,'');
+    const optionRows=q.options.map((o,i)=>{const selectedHere=selected===i,correctHere=q.answer===i;let cls='review-detail-option';if(correctHere)cls+=' correct-choice';if(selectedHere&&!correctHere)cls+=' wrong-choice';const tag=correctHere?'✓ CORRECT ANSWER':selectedHere?'✕ YOUR ANSWER':'';return `<div class="${cls}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${o}</span><b>${tag}</b></div>`;}).join('');
+    $('reviewDetailBody').innerHTML=`<div class="review-detail-question">${q.question}</div>${cleanStimulus?`<div class="review-detail-stimulus"><b>PASSAGE / STIMULUS</b><p>${cleanStimulus}</p></div>`:''}<div class="review-detail-options">${optionRows}</div><div class="review-detail-explanation"><b>EXPLANATION</b><p>${q.explanation||'Review the reasoning behind the correct option.'}</p></div>`;
+    $('reviewPrev').disabled=index===0;$('reviewNext').disabled=index===qs.length-1;$('reviewDetailModal').classList.remove('hidden');
+  }
+
+  function closeReviewDetail(){$('reviewDetailModal').classList.add('hidden');}
 
   $('nextSetBtn').addEventListener('click',e=>{e.preventDefault();startNextSet();});
   $('pauseBtn').addEventListener('click',e=>{e.preventDefault();togglePause();});
@@ -78,6 +88,9 @@ const completedSetCount=()=>new Set(attempts().map(a=>a.setId)).size;
   $('nextBtn').addEventListener('click',()=>{if(!state.paused){const n=setQuestions().length;if(state.index<n-1){state.index++;renderQuestion();}}});
   $('submitBtn').addEventListener('click',()=>{if(!state.paused)finishSet();});
   $('closeResult').addEventListener('click',()=>{$('resultModal').classList.add('hidden');});
+  $('reviewBack').addEventListener('click',closeReviewDetail);
+  $('reviewPrev').addEventListener('click',()=>{if(state.reviewIndex>0)openReviewDetail(state.reviewIndex-1);});
+  $('reviewNext').addEventListener('click',()=>{if(state.reviewIndex<state.reviewQuestions.length-1)openReviewDetail(state.reviewIndex+1);});
   document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderSets(b.dataset.filter);}));
   $('setSearch').addEventListener('input',e=>{state.search=e.target.value;renderSets(state.filter);});
   document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('homeView').classList.toggle('hidden',b.dataset.nav!=='home');$('performanceView').classList.toggle('hidden',b.dataset.nav!=='performance');if(b.dataset.nav==='performance')renderPerformance();}));
